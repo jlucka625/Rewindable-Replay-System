@@ -3,8 +3,9 @@
 /Intermediate/
 /Saved/
 /.vs
-/Plugins/Binaries/
-/Plugins/Intermediate/
+
+/Plugins/RewindableReplayExtension/Binaries/
+/Plugins/RewindableReplayExtension/Intermediate/
 
 /*.sln
 /*.opensdf
