@@ -3,6 +3,8 @@
 /Intermediate/
 /Saved/
 /.vs
+/Plugins/Binaries/
+/Plugins/Intermediate/
 
 /*.sln
 /*.opensdf

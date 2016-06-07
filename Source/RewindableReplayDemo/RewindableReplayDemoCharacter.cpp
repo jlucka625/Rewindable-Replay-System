@@ -1,10 +1,21 @@
 // Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
 
 #include "RewindableReplayDemo.h"
+#include "ReplayManager.h"
+#include "EngineUtils.h"
 #include "RewindableReplayDemoCharacter.h"
 
 //////////////////////////////////////////////////////////////////////////
 // ARewindableReplayDemoCharacter
+
+// Called when the game starts or when spawned
+void ARewindableReplayDemoCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+	TActorIterator<AReplayManager> itr(GetWorld());
+	mReplayManager = *itr;
+
+}
 
 ARewindableReplayDemoCharacter::ARewindableReplayDemoCharacter()
 {
@@ -67,7 +78,6 @@ void ARewindableReplayDemoCharacter::SetupPlayerInputComponent(class UInputCompo
 	InputComponent->BindTouch(IE_Released, this, &ARewindableReplayDemoCharacter::TouchStopped);
 }
 
-
 void ARewindableReplayDemoCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
 {
 	// jump, but only on the first touch
@@ -113,6 +123,7 @@ void ARewindableReplayDemoCharacter::MoveForward(float Value)
 
 void ARewindableReplayDemoCharacter::MoveRight(float Value)
 {
+
 	if ( (Controller != NULL) && (Value != 0.0f) )
 	{
 		// find out which way is right

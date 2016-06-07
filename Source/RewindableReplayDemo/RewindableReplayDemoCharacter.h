@@ -8,6 +8,9 @@ class ARewindableReplayDemoCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
 	/** Camera boom positioning the camera behind the character */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class USpringArmComponent* CameraBoom;
@@ -27,6 +30,9 @@ public:
 	float BaseLookUpRate;
 
 protected:
+
+	void ToggleRecording();
+	void TogglePlayback();
 
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);
@@ -62,5 +68,8 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+private:
+	class AReplayManager* mReplayManager;
 };
 

@@ -1,0 +1,22 @@
+{
+	"FileVersion" : 3,
+	
+	"FriendlyName" : "Rewindable Replay Extension",
+	"Version" : 1,
+	"VersionName" : "1.0",
+	"CreatedBy" : "Jonathan Lucka",
+	"CreatedByURL" : "jlucka.wix.com/portfolio",
+	"EngineVersion" : "4.11.2",
+	"Description" : "Records gameplay sessions for debugging",
+	"Category" : "Tools",
+	"EnabledByDefault" : true,
+	"Installed" : false,
+	"Modules" :
+	[
+		{
+			"Name" : "RewindableReplayExtensionEditor",
+			"Type" : "Editor",
+			"LoadingPhase" : "Default"
+		}
+	]
+}
