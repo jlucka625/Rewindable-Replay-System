@@ -16,3 +16,33 @@ FTransform GameFrame::GetTransform(const FString& id)
 	else
 		throw std::exception("Transform doesn't exist at key!");
 }
+
+void GameFrame::SaveDeltaTime(float DeltaTime)
+{
+	mDeltaTime = DeltaTime;
+}
+
+float GameFrame::GetDeltaTime()
+{
+	return mDeltaTime;
+}
+
+void GameFrame::SaveDebugPrintMessages(TArray<struct FScreenMessageString> PriorityScreenMessages)
+{
+	mDebugMessages = PriorityScreenMessages;
+}
+
+TArray<struct FScreenMessageString>& GameFrame::GetDebugMessages()
+{
+	return mDebugMessages;
+}
+
+void GameFrame::SaveCameraTransform(FTransform transform)
+{
+	mCameraTransform = transform;
+}
+
+FTransform & GameFrame::GetCameraTransform()
+{
+	return mCameraTransform;
+}

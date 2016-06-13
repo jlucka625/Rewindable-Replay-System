@@ -2,6 +2,7 @@
 
 #include "RewindableReplayDemo.h"
 #include "ReplayManager.h"
+#include "Engine.h"
 #include "EngineUtils.h"
 #include "RewindableReplayDemoCharacter.h"
 
@@ -12,9 +13,6 @@
 void ARewindableReplayDemoCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-	TActorIterator<AReplayManager> itr(GetWorld());
-	mReplayManager = *itr;
-
 }
 
 ARewindableReplayDemoCharacter::ARewindableReplayDemoCharacter()
@@ -60,6 +58,7 @@ void ARewindableReplayDemoCharacter::SetupPlayerInputComponent(class UInputCompo
 	// Set up gameplay key bindings
 	check(InputComponent);
 	InputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	InputComponent->BindAction("Jump", IE_Pressed, this, &ARewindableReplayDemoCharacter::Test);
 	InputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	InputComponent->BindAxis("MoveForward", this, &ARewindableReplayDemoCharacter::MoveForward);
@@ -76,6 +75,11 @@ void ARewindableReplayDemoCharacter::SetupPlayerInputComponent(class UInputCompo
 	// handle touch devices
 	InputComponent->BindTouch(IE_Pressed, this, &ARewindableReplayDemoCharacter::TouchStarted);
 	InputComponent->BindTouch(IE_Released, this, &ARewindableReplayDemoCharacter::TouchStopped);
+}
+
+void ARewindableReplayDemoCharacter::Test()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("I STARTED JUMPING!!!")));
 }
 
 void ARewindableReplayDemoCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)

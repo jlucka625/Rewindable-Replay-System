@@ -31,8 +31,7 @@ public:
 
 protected:
 
-	void ToggleRecording();
-	void TogglePlayback();
+	void Test();
 
 	/** Called for forwards/backward input */
 	void MoveForward(float Value);

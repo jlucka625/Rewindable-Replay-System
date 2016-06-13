@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Engine.h"
 /**
  * Handles interfaces for storing the necessary data to be recorded.
  */
@@ -21,6 +21,18 @@ public:
 	void AddTransform(FString id, FTransform transform);
 	FTransform GetTransform(const FString& id);
 
+	void SaveDeltaTime(float DeltaTime);
+	float GetDeltaTime();
+
+	void SaveDebugPrintMessages(TArray<struct FScreenMessageString> PriorityScreenMessages);
+	TArray<struct FScreenMessageString>& GetDebugMessages();
+
+	void SaveCameraTransform(FTransform transform);
+	FTransform& GetCameraTransform();
+
 private:
+	FTransform mCameraTransform;
 	TMap<FString, FTransform> mTransforms;
+	TArray<struct FScreenMessageString> mDebugMessages;
+	float mDeltaTime;
 };

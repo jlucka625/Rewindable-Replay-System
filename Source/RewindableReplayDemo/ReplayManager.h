@@ -27,7 +27,7 @@ public:
 
 	bool IsRecording();
 
-	void RecordData();
+	void RecordData(float DeltaTime);
 
 	void PlaybackData();
 
@@ -39,12 +39,22 @@ public:
 
 	void ScrubBackward();
 
+	void RecordTime();
+
+	void DisplayRecordedDebugInfo(GameFrame& frame);
+
+	void DisableMotionBlur();
+
+	void EnableMotionBlur();
+
 	static bool sIsRecording;
 
 	static bool sIsPlayback;
 
 private:
+	float mPreviousSeconds;
 	RingBuffer::Iterator mIterator;
 	RingBuffer mFrameBuffer;
 	static TMap<FString, class URecordingComponent*> sRecordingComponents;
+	UCameraComponent* mCamera;
 };

@@ -25,6 +25,17 @@ void URecordingComponent::BeginPlay()
 	mID = "Actor";
 	mID.AppendInt(mInstanceCounter++);
 	AReplayManager::AddRecordingComponent(this, mID);
+
+
+
+	for (TFieldIterator<UProperty> PropIt(GetOwner()->GetClass()); PropIt; ++PropIt)
+	{
+		UProperty* Property = *PropIt;
+		if (Property->GetClass() == UCameraComponent::StaticClass())
+		{
+
+		}
+	}
 }
 
 
