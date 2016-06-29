@@ -4,6 +4,8 @@
 
 #include "GameFramework/Actor.h"
 #include "RingBuffer.h"
+#include "Runtime/Engine/Classes/Components/LineBatchComponent.h"
+#include "DrawDebugHelpers.h"
 #include "ReplayManager.generated.h"
 
 UCLASS()
@@ -29,7 +31,7 @@ public:
 
 	void RecordData(float DeltaTime);
 
-	void PlaybackData();
+	void PlaybackData(float DeltaTime, bool reverse);
 
 	void ToggleRecording();
 
@@ -43,6 +45,8 @@ public:
 
 	void DisplayRecordedDebugInfo(GameFrame& frame);
 
+	void DisplayRecordedDebugDrawLines(GameFrame& frame);
+
 	void DisableMotionBlur();
 
 	void EnableMotionBlur();
@@ -55,6 +59,8 @@ private:
 	float mPreviousSeconds;
 	RingBuffer::Iterator mIterator;
 	RingBuffer mFrameBuffer;
+	float totalPlaybackTime;
+	TArray<RingBuffer::Iterator> mScrubbedFrames;
 	static TMap<FString, class URecordingComponent*> sRecordingComponents;
 	UCameraComponent* mCamera;
 };

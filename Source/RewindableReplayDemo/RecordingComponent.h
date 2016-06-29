@@ -25,7 +25,33 @@ public:
 
 	void SetActorTransform(FTransform transform);
 
+	FVector GetActorVelocity();
+
+	void SetActorVelocity(FVector& velocity);
+
+	BYTE GetMovementMode();
+
+	void SetMovementMode(BYTE& mode);
+
 	const FString& GetID() const;
+
+	float GetAnimLength();
+
+	float GetAnimTime();
+
+	void UpdateAnimationState(float DeltaTime);
+
+	void CopyProperties(UClass* OwnerClass, uint8* OwnerObject, TMap<FName, FString>& propertiesAsStrings);
+	
+	void SetProperties(UClass* OwnerClass, uint8* OwnerObject, const TMap<FName, FString>& propertiesAsStrings);
+
+	void CopyMovementComponentProperties(TMap<FName, FString>& propertiesAsStrings);
+
+	void SetMovementComponentProperties(const TMap<FName, FString>& propertiesAsStrings);
+
+	void CopyCharacterProperties(TMap<FName, FString>& propertiesAsStrings);
+
+	void SetCharacterProperties(const TMap<FName, FString>& propertiesAsStrings);
 
 private:
 	static uint32 mInstanceCounter;

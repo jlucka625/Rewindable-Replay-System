@@ -20,6 +20,7 @@ public:
 		Iterator operator--(int);
 		GameFrame& operator*();
 		const GameFrame& operator*() const;
+		const uint32 GetIndex() const { return mIndex; }
 	private:
 		Iterator(uint32 index, const RingBuffer* buffer);
 		uint32 mIndex;

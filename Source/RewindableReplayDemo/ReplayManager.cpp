@@ -41,8 +41,14 @@ void AReplayManager::BeginPlay()
 		if ((*itr)->GetOwner() == UGameplayStatics::GetPlayerPawn(GetWorld(), 0))
 		{
 			mCamera = *itr;
+			break;
 		}
 	}
+
+	if(!mCamera)
+		GEngine->AddOnScreenDebugMessage(-1, 0.5f, FColor::Red, FString::Printf(TEXT("NO CAMERA!!!")));
+
+	totalPlaybackTime = 0.0f;
 }
 
 void AReplayManager::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -72,19 +78,40 @@ void AReplayManager::RecordData(float DeltaTime)
 	for (auto& pair : sRecordingComponents)
 	{
 		FString id = pair.Key;
-		FTransform transform = pair.Value->GetActorTransform();
+		URecordingComponent* component = pair.Value;
+		//FVector velocity = pair.Value->GetActorVelocity();
+		//BYTE mode = pair.Value->GetMovementMode();
 
+		frame.InitMovementComponentProperties(id);
+		TMap<FName, FString>& movementProperties = frame.GetMovementComponentProperties(id);
+		component->CopyMovementComponentProperties(movementProperties);
+
+		frame.InitCharacterProperties(id);
+		TMap<FName, FString>& characterProperties = frame.GetCharacterProperties(id);
+		component->CopyCharacterProperties(characterProperties);
+
+
+
+		//frame.AddMovementMode(id, mode);
+		FTransform transform = component->GetActorTransform();
 		frame.AddTransform(id, transform);
+		//frame.AddVelocity(id, velocity);
 		frame.SaveDeltaTime(DeltaTime);
+		//frame.AddAnimLength(id, pair.Value->GetAnimLength());
+		//frame.AddAnimTime(id, pair.Value->GetAnimTime());
 
 		frame.SaveDebugPrintMessages(GEngine->PriorityScreenMessages);
+
+		frame.AddDebugDrawLines(GetWorld()->LineBatcher->BatchedLines);
+		frame.AddDebugDrawLines(GetWorld()->ForegroundLineBatcher->BatchedLines);
+		frame.AddDebugDrawLines(GetWorld()->PersistentLineBatcher->BatchedLines);
 	}
 
 	mFrameBuffer.Insert(frame);
 	mIterator = mFrameBuffer.begin();
 }
 
-void AReplayManager::PlaybackData()
+void AReplayManager::PlaybackData(float DeltaTime, bool reverse)
 {
 	GameFrame& frame = *mIterator;
 	for (auto& pair : sRecordingComponents)
@@ -93,12 +120,46 @@ void AReplayManager::PlaybackData()
 		URecordingComponent* component = pair.Value;
 
 		FTransform transform = frame.GetTransform(id);
-
 		component->SetActorTransform(transform);
+
+		component->SetCharacterProperties(frame.GetCharacterProperties(id));
+
+		component->SetMovementComponentProperties(frame.GetMovementComponentProperties(id));
+
+		//FVector& velocity = frame.GetVelocity(id);
+
+		//component->SetActorVelocity(velocity);
+
+		//BYTE& mode = frame.GetMovementMode(id);
+
+		//component->SetMovementMode(mode);
+
+		component->UpdateAnimationState(DeltaTime);
 
 		DisplayRecordedDebugInfo(frame);
 
+		DisplayRecordedDebugDrawLines(frame);
+
 		UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->UpdateCamera(0.0f);
+	}
+}
+
+void AReplayManager::DisplayRecordedDebugDrawLines(GameFrame& frame)
+{
+	GetWorld()->LineBatcher->Flush();
+	GetWorld()->ForegroundLineBatcher->Flush();
+	GetWorld()->PersistentLineBatcher->Flush();
+
+	for (auto& line : frame.GetDebugDrawLines())
+	{
+		FVector lineStart = line.Start;
+		FVector lineEnd = line.End;
+		FColor color = line.Color.ToFColor(true);
+		float lifetime = 100.0f;
+		uint8 depthPriority = line.DepthPriority;
+		float thickness = line.Thickness;
+
+		DrawDebugLine(GetWorld(), lineStart, lineEnd, color, true, lifetime, depthPriority, thickness);
 	}
 }
 
@@ -165,18 +226,25 @@ void AReplayManager::ScrubForward()
 	float currentSeconds = UGameplayStatics::GetRealTimeSeconds(GetWorld());
 	float deltaSeconds = currentSeconds - mPreviousSeconds;
 
+	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, FString::Printf(TEXT("%f"), deltaSeconds));
+
 	float totalSeconds = 0.0f;
 	while (totalSeconds < deltaSeconds)
 	{
 		if (mIterator != mFrameBuffer.end())
 		{
-			GameFrame& frame = *(mIterator++);
+			GameFrame& frame = *mIterator;
 			totalSeconds += frame.GetDeltaTime();
+			mIterator++;
 		}
-		else break;
+		else return;
 	}
 
-	PlaybackData();
+	totalPlaybackTime += (*mIterator).GetDeltaTime();
+
+	//GEngine->AddOnScreenDebugMessage(-1, 40.0f, FColor::Red, FString::Printf(TEXT("TIME: %f"), totalPlaybackTime));
+	mScrubbedFrames.Add(mIterator);
+	PlaybackData((*mIterator).GetDeltaTime(), false);
 
 	mPreviousSeconds = UGameplayStatics::GetRealTimeSeconds(GetWorld());
 }
@@ -186,23 +254,36 @@ void AReplayManager::ScrubBackward()
 	if (!sIsPlayback)
 		return;
 
-	float currentSeconds = UGameplayStatics::GetRealTimeSeconds(GetWorld());
-	float deltaSeconds = currentSeconds - mPreviousSeconds;
+	if(mScrubbedFrames.Num() > 0)
+		mScrubbedFrames.RemoveAt(mScrubbedFrames.Num() - 1, 1, false);
 
-	float totalSeconds = 0.0f;
-	while (totalSeconds < deltaSeconds)
+	if (mScrubbedFrames.Num() == 0)
 	{
-		if (mIterator != mFrameBuffer.begin())
-		{
-			GameFrame& frame = *(mIterator--);
-			totalSeconds += frame.GetDeltaTime();
-		}
-		else break;
+		mIterator = mFrameBuffer.begin();
+		PlaybackData(0.0f, true);
+		return;
 	}
 
-	PlaybackData();
+	mIterator = mFrameBuffer.begin();
 
-	mPreviousSeconds = UGameplayStatics::GetRealTimeSeconds(GetWorld());
+	for (auto& pair : sRecordingComponents)
+	{
+		ACharacter* character = Cast<ACharacter>(pair.Value->GetOwner());
+		//character->SetActorHiddenInGame(true);
+		if (character)
+		{
+			USkeletalMeshComponent* mesh = character->GetMesh();
+			if (mesh)
+				mesh->InitAnim(true);
+		}
+	}
+
+	for (auto& it : mScrubbedFrames)
+	{
+		PlaybackData((*mIterator).GetDeltaTime(), true);
+		mIterator = it;
+	}
+	PlaybackData((*mIterator).GetDeltaTime(), true);
 }
 
 void AReplayManager::AddRecordingComponent(URecordingComponent * component, FString componentID)

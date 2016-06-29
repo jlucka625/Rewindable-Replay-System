@@ -6,6 +6,6 @@ public class RewindableReplayDemo : ModuleRules
 {
 	public RewindableReplayDemo(TargetInfo Target)
 	{
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore" });
-	}
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "UnrealEd" });
+    }
 }
