@@ -62,5 +62,6 @@ private:
 	float totalPlaybackTime;
 	TArray<RingBuffer::Iterator> mScrubbedFrames;
 	static TMap<FString, class URecordingComponent*> sRecordingComponents;
+	static TArray<FString> mNewlyAddedComponentIDs;
 	UCameraComponent* mCamera;
 };

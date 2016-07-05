@@ -9,8 +9,37 @@
 class REWINDABLEREPLAYDEMO_API RecordableEntry
 {
 public:
-	RecordableEntry() = default;
+	enum class EntryCommands
+	{
+		SPAWN_ME,
+		DESTROY_ME,
+		DO_NOTHING
+	};
+
+	RecordableEntry() : mEntryCommand(EntryCommands::DO_NOTHING) {};
 	~RecordableEntry() = default;
+
+	void SetEntryCommand(EntryCommands command);
+	EntryCommands GetEntryCommand();
+
+	void AddTransform(FTransform transform);
+	FTransform GetTransform();
+
+	//void InitMovementComponentProperties();
+	TMap<FName, FString>& GetMovementComponentProperties();
+
+	//void InitCharacterProperties();
+	TMap<FName, FString>& GetCharacterProperties();
+
+	UClass* GetClass();
+	void SetClass(UClass* uclass);
+
+private:
+	UClass* mClass;
+	EntryCommands mEntryCommand;
+	FTransform mTransform;
+	TMap<FName, FString> mMovementComponentProperties;
+	TMap<FName, FString> mCharacterProperties;
 };
 
 class REWINDABLEREPLAYDEMO_API GameFrame
@@ -18,21 +47,6 @@ class REWINDABLEREPLAYDEMO_API GameFrame
 public:
 	GameFrame() = default;
 	~GameFrame() = default;
-
-	void AddTransform(FString id, FTransform transform);
-	FTransform GetTransform(const FString& id);
-
-	void AddAnimLength(FString id, float length);
-	float GetAnimLength(const FString& id);
-
-	void AddAnimTime(FString id, float time);
-	float GetAnimTime(const FString& id);
-
-	void AddVelocity(FString id, FVector velocity);
-	FVector& GetVelocity(const FString& id);
-
-	void AddMovementMode(FString id, BYTE mode);
-	BYTE& GetMovementMode(const FString& id);
 
 	void SaveDeltaTime(float DeltaTime);
 	float GetDeltaTime();
@@ -46,24 +60,14 @@ public:
 	void AddDebugDrawLines(TArray<FBatchedLine> BatchedLines);
 	TArray<struct FBatchedLine>& GetDebugDrawLines();
 
-	//void AddMovementComponentProperties(const FString& id, void* buffer);
-	//void* GetMovementComponentProperties(const FString& id);
-
-	void InitMovementComponentProperties(const FString& id);
-	TMap<FName, FString>& GetMovementComponentProperties(const FString& id);
-
-	void InitCharacterProperties(const FString& id);
-	TMap<FName, FString>& GetCharacterProperties(const FString& id);
+	RecordableEntry* GetRecordableEntry(const FString& id);
 
 private:
 	FTransform mCameraTransform;
-	TMap<FString, FTransform> mTransforms;
-	TMap<FString, FVector> mVelocities;
-	TMap<FString, BYTE> mMovement;
-	TMap<FString, float> mAnimLengths;
-	TMap<FString, float> mAnimTimes;
-	TMap<FString, TMap<FName, FString>> mMovementComponentProperties;
-	TMap<FString, TMap<FName, FString>> mCharacterProperties;
+	//TMap<FString, FTransform> mTransforms;
+	//TMap<FString, TMap<FName, FString>> mMovementComponentProperties;
+	//TMap<FString, TMap<FName, FString>> mCharacterProperties;
+	TMap<FString, RecordableEntry> mRecordableEntries;
 
 	TArray<struct FScreenMessageString> mDebugMessages;
 	TArray<struct FBatchedLine> mBatchedLines;

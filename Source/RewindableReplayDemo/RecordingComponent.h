@@ -25,19 +25,9 @@ public:
 
 	void SetActorTransform(FTransform transform);
 
-	FVector GetActorVelocity();
-
-	void SetActorVelocity(FVector& velocity);
-
-	BYTE GetMovementMode();
-
-	void SetMovementMode(BYTE& mode);
-
 	const FString& GetID() const;
 
-	float GetAnimLength();
-
-	float GetAnimTime();
+	void SetID(const FString& id);
 
 	void UpdateAnimationState(float DeltaTime);
 

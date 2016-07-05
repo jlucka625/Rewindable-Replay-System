@@ -7,6 +7,7 @@
 #include "RecordableEntry.h"
 
 TMap<FString, class URecordingComponent*> AReplayManager::sRecordingComponents;
+TArray<FString> AReplayManager::mNewlyAddedComponentIDs;
 bool AReplayManager::sIsRecording = false;
 bool AReplayManager::sIsPlayback = false;
 
@@ -75,37 +76,49 @@ void AReplayManager::RecordData(float DeltaTime)
 
 	GameFrame frame;
 
+	//for (auto& id : mNewlyAddedComponentIDs)
+	//{
+		//RecordableEntry* entry = frame.GetRecordableEntry(id);
+		//entry->SetEntryCommand(RecordableEntry::EntryCommands::SPAWN_ME);
+	//}
+	//mNewlyAddedComponentIDs.Empty();
+
 	for (auto& pair : sRecordingComponents)
 	{
 		FString id = pair.Key;
 		URecordingComponent* component = pair.Value;
-		//FVector velocity = pair.Value->GetActorVelocity();
-		//BYTE mode = pair.Value->GetMovementMode();
 
-		frame.InitMovementComponentProperties(id);
-		TMap<FName, FString>& movementProperties = frame.GetMovementComponentProperties(id);
+		RecordableEntry* entry = frame.GetRecordableEntry(id);
+
+		if (!component || !component->IsValidLowLevel() || component->IsPendingKill())
+		{
+			entry->SetEntryCommand(RecordableEntry::EntryCommands::DO_NOTHING);
+			continue;
+		}
+		else
+		{
+			entry->SetEntryCommand(RecordableEntry::EntryCommands::SPAWN_ME);
+		}
+
+		entry->SetClass(component->GetOwner()->GetClass());
+
+		//frame.InitMovementComponentProperties(id);
+		TMap<FName, FString>& movementProperties = entry->GetMovementComponentProperties();
 		component->CopyMovementComponentProperties(movementProperties);
 
-		frame.InitCharacterProperties(id);
-		TMap<FName, FString>& characterProperties = frame.GetCharacterProperties(id);
+		//frame.InitCharacterProperties(id);
+		TMap<FName, FString>& characterProperties = entry->GetCharacterProperties();
 		component->CopyCharacterProperties(characterProperties);
 
-
-
-		//frame.AddMovementMode(id, mode);
 		FTransform transform = component->GetActorTransform();
-		frame.AddTransform(id, transform);
-		//frame.AddVelocity(id, velocity);
-		frame.SaveDeltaTime(DeltaTime);
-		//frame.AddAnimLength(id, pair.Value->GetAnimLength());
-		//frame.AddAnimTime(id, pair.Value->GetAnimTime());
-
-		frame.SaveDebugPrintMessages(GEngine->PriorityScreenMessages);
-
-		frame.AddDebugDrawLines(GetWorld()->LineBatcher->BatchedLines);
-		frame.AddDebugDrawLines(GetWorld()->ForegroundLineBatcher->BatchedLines);
-		frame.AddDebugDrawLines(GetWorld()->PersistentLineBatcher->BatchedLines);
+		entry->AddTransform(transform);
 	}
+
+	frame.SaveDeltaTime(DeltaTime);
+	frame.SaveDebugPrintMessages(GEngine->PriorityScreenMessages);
+	frame.AddDebugDrawLines(GetWorld()->LineBatcher->BatchedLines);
+	frame.AddDebugDrawLines(GetWorld()->ForegroundLineBatcher->BatchedLines);
+	frame.AddDebugDrawLines(GetWorld()->PersistentLineBatcher->BatchedLines);
 
 	mFrameBuffer.Insert(frame);
 	mIterator = mFrameBuffer.begin();
@@ -118,30 +131,35 @@ void AReplayManager::PlaybackData(float DeltaTime, bool reverse)
 	{
 		FString id = pair.Key;
 		URecordingComponent* component = pair.Value;
+		RecordableEntry* entry = frame.GetRecordableEntry(id);
 
-		FTransform transform = frame.GetTransform(id);
-		component->SetActorTransform(transform);
+		if ((!component || !component->IsValidLowLevel() || component->IsPendingKill())
+			&& entry->GetEntryCommand() == RecordableEntry::EntryCommands::SPAWN_ME)
+		{
+			FTransform transform = entry->GetTransform();
+			AActor* spawned = GetWorld()->SpawnActor(entry->GetClass(), &transform);
+			URecordingComponent* recordingComponent = Cast<URecordingComponent>(spawned->GetComponentByClass(URecordingComponent::StaticClass()));
+			//FString oldID = recordingComponent->GetID();
+			//mNewlyAddedComponentIDs.Empty();
+			recordingComponent->SetID(id);
+			sRecordingComponents[id] = recordingComponent;
+		}
+		//else if(component && entry->GetEntryCommand() == RecordableEntry::EntryCommands::DESTROY_ME)
 
-		component->SetCharacterProperties(frame.GetCharacterProperties(id));
+		component->SetActorTransform(entry->GetTransform());
 
-		component->SetMovementComponentProperties(frame.GetMovementComponentProperties(id));
+		component->SetCharacterProperties(entry->GetCharacterProperties());
 
-		//FVector& velocity = frame.GetVelocity(id);
-
-		//component->SetActorVelocity(velocity);
-
-		//BYTE& mode = frame.GetMovementMode(id);
-
-		//component->SetMovementMode(mode);
+		component->SetMovementComponentProperties(entry->GetMovementComponentProperties());
 
 		component->UpdateAnimationState(DeltaTime);
-
-		DisplayRecordedDebugInfo(frame);
-
-		DisplayRecordedDebugDrawLines(frame);
-
-		UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->UpdateCamera(0.0f);
 	}
+
+	DisplayRecordedDebugInfo(frame);
+
+	DisplayRecordedDebugDrawLines(frame);
+
+	UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->UpdateCamera(0.0f);
 }
 
 void AReplayManager::DisplayRecordedDebugDrawLines(GameFrame& frame)
@@ -226,7 +244,6 @@ void AReplayManager::ScrubForward()
 	float currentSeconds = UGameplayStatics::GetRealTimeSeconds(GetWorld());
 	float deltaSeconds = currentSeconds - mPreviousSeconds;
 
-	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, FString::Printf(TEXT("%f"), deltaSeconds));
 
 	float totalSeconds = 0.0f;
 	while (totalSeconds < deltaSeconds)
@@ -240,6 +257,7 @@ void AReplayManager::ScrubForward()
 		else return;
 	}
 
+	//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, FString::Printf(TEXT("%f"), (*mIterator).GetDeltaTime()));
 	totalPlaybackTime += (*mIterator).GetDeltaTime();
 
 	//GEngine->AddOnScreenDebugMessage(-1, 40.0f, FColor::Red, FString::Printf(TEXT("TIME: %f"), totalPlaybackTime));
@@ -288,7 +306,11 @@ void AReplayManager::ScrubBackward()
 
 void AReplayManager::AddRecordingComponent(URecordingComponent * component, FString componentID)
 {
-	sRecordingComponents.Add(componentID, component);
+	if (!sIsPlayback)
+	{
+		sRecordingComponents.Add(componentID, component);
+		mNewlyAddedComponentIDs.Add(componentID);
+	}
 }
 
 bool AReplayManager::IsRecording()
