@@ -1,7 +1,6 @@
 // Copyright 1998-2016 Epic Games, Inc. All Rights Reserved.
 
 #include "RewindableReplayDemo.h"
-#include "ReplayManager.h"
 #include "Engine.h"
 #include "EngineUtils.h"
 #include "RewindableReplayDemoCharacter.h"

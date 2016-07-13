@@ -13,5 +13,5 @@ public:
 
 	void RegisterCommands() override;
 
-	TSharedPtr<FUICommandInfo> TestCommand;
+	TSharedPtr<FUICommandInfo> ReplayCommand;
 };

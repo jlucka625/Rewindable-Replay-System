@@ -11,12 +11,13 @@
 	"Category" : "Tools",
 	"EnabledByDefault" : true,
 	"Installed" : false,
+	"CanContainContent" : true,
 	"Modules" :
 	[
 		{
 			"Name" : "RewindableReplayExtensionEditor",
 			"Type" : "Editor",
-			"LoadingPhase" : "Default"
+			"LoadingPhase" : "PreDefault"
 		}
 	]
 }

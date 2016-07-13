@@ -4,6 +4,13 @@ public class RewindableReplayExtensionEditor : ModuleRules
 {
     public RewindableReplayExtensionEditor(TargetInfo Target)
     {
+        PrivateIncludePaths.AddRange(
+            new string[] {
+                "RewindableReplayExtension/Private",
+                // ... add other private include paths required here ...
+            }
+        );
+
         PublicDependencyModuleNames.AddRange(
             new string[] {
                 "Core",
@@ -19,7 +26,8 @@ public class RewindableReplayExtensionEditor : ModuleRules
                 "InputCore",
                 "SlateCore",
                 "PropertyEditor",
-                "LevelEditor"
+                "LevelEditor",
+                "Projects"
             }
         );
     }

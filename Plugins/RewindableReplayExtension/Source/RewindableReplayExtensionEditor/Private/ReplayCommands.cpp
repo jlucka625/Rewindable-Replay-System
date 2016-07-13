@@ -5,7 +5,7 @@
 
 void FReplayCommands::RegisterCommands()
 {
-	UI_COMMAND(TestCommand, "Test Command", "Performs a test command", EUserInterfaceActionType::Button, FInputGesture());
+	UI_COMMAND(ReplayCommand, "Record", "Activates Replay Tool", EUserInterfaceActionType::Button, FInputGesture());
 }
 
 #undef LOCTEXT_NAMESPACE
