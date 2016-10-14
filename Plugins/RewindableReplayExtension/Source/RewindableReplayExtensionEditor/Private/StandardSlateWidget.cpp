@@ -18,9 +18,15 @@ void SStandardSlateWidget::Construct(const FArguments& InArgs)
 	{
 		static void ValueChanged(float rate)
 		{
-			AReplayManager::GetInstance()->Scrub(rate < 0.0f);
+			AReplayManager::GetInstance()->Scrub();
 		}
 	};
+
+	FQuat2D quatC(-PI/2.0f);
+	FQuat2D quatCC(PI/2.0f);
+	FSlateRenderTransform transformC(quatC);
+	FSlateRenderTransform transformCC(quatCC);
+	FVector2D pivot(0.5f, 0.5f);
 
 	ChildSlot
 		.VAlign(VAlign_Fill)
@@ -34,6 +40,14 @@ void SStandardSlateWidget::Construct(const FArguments& InArgs)
 			+ SOverlay::Slot().VAlign(VAlign_Bottom).HAlign(HAlign_Center)
 			[
 				SNew(SVerticalBox)
+				+ SVerticalBox::Slot().VAlign(VAlign_Top).HAlign(HAlign_Right).AutoHeight()
+				[
+					SNew(SButton).ButtonColorAndOpacity(FLinearColor(1.0f, 1.0f, 1.0f, 0.0f))
+					.OnClicked_Lambda([]()->FReply {AReplayManager::GetInstance()->Stop(); return FReply::Handled(); })
+					[
+						SNew(SImage).Image(FReplayStyle::Get()->GetBrush("ExitButton"))
+					]
+				]
 				+ SVerticalBox::Slot().VAlign(VAlign_Top).HAlign(HAlign_Left).AutoHeight()
 				[
 					SNew(SHorizontalBox)
@@ -52,12 +66,32 @@ void SStandardSlateWidget::Construct(const FArguments& InArgs)
 							SNew(SImage).Image(FReplayStyle::Get()->GetBrush("PauseButton"))
 						]
 					]*/
+					+SHorizontalBox::Slot().VAlign(VAlign_Top).HAlign(HAlign_Left).Padding(FMargin(60.0f, 5.0f, 60.0f, 0.0f))
+					[
+						SNew(SButton).ButtonColorAndOpacity(FLinearColor(1.0f, 1.0f, 1.0f, 0.0f))
+						.OnClicked_Lambda([]()->FReply {AReplayManager::GetInstance()->TogglePlayback(-3.0f); return FReply::Handled(); })
+						[
+							SNew(SImage).Image(FReplayStyle::Get()->GetBrush("RewindButton"))
+							.RenderTransformPivot(pivot)
+							.RenderTransform(transformCC)
+						]
+					]
 					+ SHorizontalBox::Slot().VAlign(VAlign_Top).HAlign(HAlign_Left).Padding(FMargin(60.0f, 0.0f, 60.0f, 0.0f))
 					[
 						SNew(SButton).ButtonColorAndOpacity(FLinearColor(1.0f, 1.0f, 1.0f, 0.0f))
-						.OnClicked_Lambda([]()->FReply {AReplayManager::GetInstance()->TogglePlayback(); return FReply::Handled(); })
+						.OnClicked_Lambda([]()->FReply {AReplayManager::GetInstance()->TogglePlayback(1.0f); return FReply::Handled(); })
 						[
 							SAssignNew(PlayButtonImage, SImage).Image(FReplayStyle::Get()->GetBrush("PlayButton"))
+						]
+					]
+					+ SHorizontalBox::Slot().VAlign(VAlign_Top).HAlign(HAlign_Left).Padding(FMargin(60.0f, 5.0f, 60.0f, 0.0f))
+					[
+						SNew(SButton).ButtonColorAndOpacity(FLinearColor(1.0f, 1.0f, 1.0f, 0.0f))
+						.OnClicked_Lambda([]()->FReply {AReplayManager::GetInstance()->TogglePlayback(3.0f); return FReply::Handled(); })
+						[
+							SNew(SImage).Image(FReplayStyle::Get()->GetBrush("FastForwardButton"))
+							.RenderTransformPivot(pivot)
+							.RenderTransform(transformCC)
 						]
 					]
 					+ SHorizontalBox::Slot().VAlign(VAlign_Top).HAlign(HAlign_Left).Padding(FMargin(20.0f, 0.0f, 20.0f, 0.0f))
@@ -69,9 +103,9 @@ void SStandardSlateWidget::Construct(const FArguments& InArgs)
 						]
 					]
 				]
-				+ SVerticalBox::Slot().VAlign(VAlign_Top).HAlign(HAlign_Left)
+				+ SVerticalBox::Slot().VAlign(VAlign_Top).HAlign(HAlign_Center)
 				[
-					SNew(SBox).WidthOverride(500.0f).Padding(FMargin(15.0f, 0.0f, 0.0f, 20.0f))
+					SNew(SBox).WidthOverride(830.0f).Padding(FMargin(0.0f, 0.0f, 0.0f, 20.0f))
 					[
 						SAssignNew(Scrubber, SSlider).SliderBarColor(FSlateColor(FLinearColor(1.0f, 0.0f, 0.0f, 1.0f)))
 						.OnValueChanged_Static(&Local::ValueChanged)

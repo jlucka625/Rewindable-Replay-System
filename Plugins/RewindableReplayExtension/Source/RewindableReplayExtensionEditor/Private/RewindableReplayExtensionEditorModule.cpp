@@ -3,6 +3,7 @@
 #include "ReplayTool.h"
 #include "ReplayStyle.h"
 #include "ReplayManager.h"
+#include "ReplayCommands.h"
 #include "PropertyEditorModule.h"
 #include "LevelEditor.h"
 
@@ -67,7 +68,10 @@ void FRewindableReplayExtensionEditorModule::ShutdownModule()
 
 void FRewindableReplayExtensionEditorModule::HandleTestCommandExcute()
 {
-	AReplayManager::GetInstance()->ExecuteReplaySystem();
+	if(AReplayManager::GetInstance())
+		AReplayManager::GetInstance()->ExecuteReplaySystem();
+	else
+		FPlatformMisc::MessageBoxExt(EAppMsgType::Ok, TEXT("Must be playing in editor"), TEXT("Replay System"));
 }
 
 bool FRewindableReplayExtensionEditorModule::HandleTestCommandCanExcute()

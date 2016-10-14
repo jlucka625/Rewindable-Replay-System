@@ -27,7 +27,7 @@ URecordingComponent::URecordingComponent()
 void URecordingComponent::BeginPlay()
 {
 	Super::BeginPlay();
-	mID = "Actor";
+	mID = GetOwner()->GetName();
 	mID.AppendInt(mInstanceCounter++);
 	AReplayManager::AddRecordingComponent(this, mID);
 }
@@ -46,9 +46,18 @@ FTransform URecordingComponent::GetActorTransform()
 	return GetOwner()->GetTransform();
 }
 
-void URecordingComponent::SetActorTransform(FTransform transform)
+void URecordingComponent::SetActorTransform(FTransform& transform)
 {
-	GetOwner()->SetActorTransform(transform);
+	//GetOwner()->SetActorTransform(transform);
+	if (!GetOwner()->GetRootComponent())
+		return;
+
+	if (GetOwner()->GetRootComponent()->Mobility == EComponentMobility::Static)
+		return;
+
+	GetOwner()->SetActorLocation(transform.GetLocation());
+	GetOwner()->SetActorRotation(transform.GetRotation());
+	GetOwner()->SetActorScale3D(transform.GetScale3D());
 }
 
 const FString & URecordingComponent::GetID() const
@@ -69,6 +78,7 @@ void URecordingComponent::UpdateAnimationState(float DeltaTime)
 		USkeletalMeshComponent* mesh = character->GetMesh();
 		if (mesh)
 		{
+			//mesh->TickAnimation(DeltaTime);
 			mesh->TickAnimation(DeltaTime, false);
 			mesh->TickPose(DeltaTime, false);
 			mesh->TickComponent(DeltaTime, LEVELTICK_All, &mesh->PrimaryComponentTick);
@@ -121,11 +131,25 @@ void URecordingComponent::CopyMovementComponentProperties(TMap<FName, FString>& 
 	ACharacter* character = Cast<ACharacter>(GetOwner());
 	if (character)
 	{
+		/*TArray<UActorComponent*> components = character->GetComponents();
+		int32 i = 0;
+		for (auto& component : components)
+		{
+			UClass* uclass = component->GetClass();
+			//if (component->IsA(UCharacterMovementComponent::StaticClass()))
+			//{
+			if (component->IsA(URecordingComponent::StaticClass()) || component->IsA(USkeletalMeshComponent::StaticClass()))
+			{
+				continue;
+			}
+			propertiesAsStrings.AddDefaulted();
+			CopyProperties(uclass, (uint8*)component, propertiesAsStrings[i++]);
+			//}
+		}*/
 		UCharacterMovementComponent* movement = character->GetCharacterMovement();
 		if (movement)
 		{
 			UClass* movementClass = movement->GetClass();
-			movement->IsA(movementClass);
 			CopyProperties(movementClass, (uint8*)movement, propertiesAsStrings);
 		}
 	}
@@ -136,6 +160,22 @@ void URecordingComponent::SetMovementComponentProperties(const TMap<FName, FStri
 	ACharacter* character = Cast<ACharacter>(GetOwner());
 	if (character)
 	{
+		/*TArray<UActorComponent*> components = character->GetComponents();
+		int32 i = 0;
+		for (auto& component : components)
+		{
+			UClass* uclass = component->GetClass();
+			if (component->IsA(URecordingComponent::StaticClass()) || component->IsA(USkeletalMeshComponent::StaticClass()))
+			{
+				continue;
+			}
+			//const TMap<FName, FString >* map = propertiesAsStrings.Find(component->GetFName());
+				//propertiesAsStrings.AddDefaulted();
+			//if(map)
+				SetProperties(uclass, (uint8*)component, propertiesAsStrings[i++]);
+			//}
+			//SetProperties(uclass, (uint8*)component, propertiesAsStrings[i++]);
+		}*/
 		UCharacterMovementComponent* movement = character->GetCharacterMovement();
 		if (movement)
 		{
@@ -147,7 +187,8 @@ void URecordingComponent::SetMovementComponentProperties(const TMap<FName, FStri
 
 void URecordingComponent::CopyCharacterProperties(TMap<FName, FString>& propertiesAsStrings)
 {
-	ACharacter* character = Cast<ACharacter>(GetOwner());
+	//ACharacter* character = Cast<ACharacter>(GetOwner());
+	AActor* character = GetOwner();
 	if (character)
 	{
 		UClass* characterClass = character->GetClass();
@@ -157,10 +198,71 @@ void URecordingComponent::CopyCharacterProperties(TMap<FName, FString>& properti
 
 void URecordingComponent::SetCharacterProperties(const TMap<FName, FString>& propertiesAsStrings)
 {
-	ACharacter* character = Cast<ACharacter>(GetOwner());
+	//ACharacter* character = Cast<ACharacter>(GetOwner());
+	AActor* character = GetOwner();
 	if (character)
 	{
 		UClass* characterClass = character->GetClass();
 		SetProperties(characterClass, (uint8*)character, propertiesAsStrings);
+	}
+}
+
+void URecordingComponent::CopyAnimBPProperties(TMap<FName, FString>& propertiesAsStrings)
+{
+	ACharacter* character = Cast<ACharacter>(GetOwner());
+	if (character)
+	{
+		UAnimInstance* animInstance = character->GetMesh()->GetAnimInstance();
+		if (animInstance)
+		{
+			UClass* animClass = animInstance->GetClass();
+			CopyProperties(animClass, (uint8*)animInstance, propertiesAsStrings);
+		}
+	}
+}
+
+void URecordingComponent::SetAnimBPProperties(const TMap<FName, FString>& propertiesAsStrings)
+{
+	ACharacter* character = Cast<ACharacter>(GetOwner());
+	if (character)
+	{
+		UAnimInstance* animInstance = character->GetMesh()->GetAnimInstance();
+		if (animInstance)
+		{
+			UClass* animClass = animInstance->GetClass();
+			SetProperties(animClass, (uint8*)animInstance, propertiesAsStrings);
+		}
+	}
+}
+
+void URecordingComponent::GetComponentTransforms(TMap<FName, FTransform>& componentTransforms)
+{
+	const TArray<UActorComponent*> components = GetOwner()->GetComponents();
+	for (auto& component : components)
+	{
+		USceneComponent* sceneComponent = Cast<USceneComponent>(component);
+		if (sceneComponent)
+		{
+			if (sceneComponent->Mobility == EComponentMobility::Static)
+				continue;
+			componentTransforms.Add(sceneComponent->GetFName(), sceneComponent->GetComponentTransform());
+		}
+	}
+}
+
+void URecordingComponent::SetComponentTransforms(const TMap<FName, FTransform>& componentTransforms)
+{
+	const TArray<UActorComponent*> components = GetOwner()->GetComponents();
+	for (auto& component : components)
+	{
+		const FTransform* transform = componentTransforms.Find(component->GetFName());
+		if (transform)
+		{
+			USceneComponent* sceneComponent = Cast<USceneComponent>(component);
+			if (sceneComponent->Mobility == EComponentMobility::Static)
+				continue;
+			
+			sceneComponent->SetWorldTransform(*transform);
+		}
 	}
 }

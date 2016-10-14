@@ -38,6 +38,8 @@ public:
 	const uint32& Size() const;
 	const uint32& Capacity() const;
 
+	void Clear();
+
 private:
 	GameFrame* mContainer;
 

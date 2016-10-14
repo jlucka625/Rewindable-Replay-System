@@ -26,7 +26,7 @@ void FReplayStyle::Initialize()
 
 	FSlateStyleRegistry::RegisterSlateStyle(*StyleSet.Get());
 
-	const FVector2D size(530.0f, 140.0f);
+	const FVector2D size(860.0f, 150.0f);
 	const FVector2D sliderSize(500.0f, 12.0f);
 	const FVector2D icon128(80.0f, 80.0f);
 	const FVector2D icon40(40.0f, 40.0f);
@@ -37,8 +37,10 @@ void FReplayStyle::Initialize()
 		StyleSet->Set("PauseButton", new IMAGE_BRUSH(TEXT("Icons/icon_pause_40x"), icon128));
 		StyleSet->Set("BeginButton", new IMAGE_BRUSH(TEXT("Icons/icon_step_back_40x"), icon128));
 		StyleSet->Set("EndButton", new IMAGE_BRUSH(TEXT("Icons/icon_step_40x"), icon128));
-		StyleSet->Set("EndButton", new IMAGE_BRUSH(TEXT("Icons/icon_step_40x"), icon128));
+		StyleSet->Set("RewindButton", new IMAGE_BRUSH(TEXT("Icons/icon_Cascade_LowestLOD_40x"), icon128));
+		StyleSet->Set("FastForwardButton", new IMAGE_BRUSH(TEXT("Icons/icon_Cascade_HighestLOD_40x"), icon128));
 		StyleSet->Set("RecordButton", new IMAGE_BRUSH(TEXT("Icons/icon_Persona_StartRecord_40x"), icon40));
+		StyleSet->Set("ExitButton", new IMAGE_BRUSH(TEXT("Icons/icon_Cascade_DeleteLOD_40x"), icon40));
 	}
 
 	{

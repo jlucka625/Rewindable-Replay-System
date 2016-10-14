@@ -6,7 +6,7 @@
 	"VersionName" : "1.0",
 	"CreatedBy" : "Jonathan Lucka",
 	"CreatedByURL" : "jlucka.wix.com/portfolio",
-	"EngineVersion" : "4.11.2",
+	"EngineVersion" : "4.10.2",
 	"Description" : "Records gameplay sessions for debugging",
 	"Category" : "Tools",
 	"EnabledByDefault" : true,

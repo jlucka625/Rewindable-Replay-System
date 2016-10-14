@@ -32,13 +32,7 @@ public:
 
 	void ToggleRecording();
 
-	void TogglePlayback();
-
-	void ScrubForward();
-
-	void ScrubBackward();
-
-	void RecordTime();
+	void TogglePlayback(float TimeDilation);
 
 	void DisplayRecordedDebugInfo(GameFrame& frame);
 
@@ -56,11 +50,17 @@ public:
 
 	void ExecuteReplaySystem();
 
-	void Scrub(bool reverse);
+	void Scrub();
 
 	void Begin();
 
 	void End();
+
+	void Stop();
+
+	void AddPreloadedComponents();
+
+	bool IsComponentValid(URecordingComponent* component);
 
 private:
 	// Sets default values for this actor's properties
@@ -75,7 +75,18 @@ private:
 	RingBuffer mFrameBuffer;
 	float totalPlaybackTime;
 	TArray<RingBuffer::Iterator> mScrubbedFrames;
-	static TMap<FString, class URecordingComponent*> sRecordingComponents;
-	static TArray<FString> mNewlyAddedComponentIDs;
+
+	UPROPERTY()
+	TMap<FString, class URecordingComponent*> sRecordingComponents;
+
+	UPROPERTY()
+	TMap<FString, UClass*> ComponentClasses;
+
+	static TArray<TPair<FString, class URecordingComponent*>> mNewlyAddedComponentIDs;
+
+	//UPROPERTY()
+	//TArray<TPair<FString, class URecordingComponent*>> StopMapGarbageCollection;
+
 	UCameraComponent* mCamera;
+	bool PlayInReverse;
 };

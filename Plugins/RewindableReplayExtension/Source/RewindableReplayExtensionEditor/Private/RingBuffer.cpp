@@ -2,6 +2,7 @@
 
 #include "RewindableReplayExtensionEditorPrivatePCH.h"
 #include "RingBuffer.h"
+#include "Memory.h"
 #include "RecordableEntry.h"
 
 #pragma region Iterator
@@ -91,7 +92,7 @@ const GameFrame& RingBuffer::Iterator::operator*() const
 RingBuffer::RingBuffer(uint32 capacity) :
 	mCapacity(capacity)
 {
-	mContainer = reinterpret_cast<GameFrame*>(malloc(sizeof(GameFrame) * mCapacity));
+	mContainer = reinterpret_cast<GameFrame*>(FMemory::Malloc(sizeof(GameFrame) * mCapacity));
 }
 
 void RingBuffer::Insert(const GameFrame& value)
@@ -152,7 +153,16 @@ RingBuffer::~RingBuffer()
 	{
 		mContainer[--mSize].~GameFrame();
 	}
-	free(mContainer);
+	FMemory::Free(mContainer);
+}
+
+void RingBuffer::Clear()
+{
+	while (mSize > 0)
+	{
+		mContainer[--mSize].~GameFrame();
+	}
+	mCurrentIndex = 0;
 }
 
 #pragma endregion

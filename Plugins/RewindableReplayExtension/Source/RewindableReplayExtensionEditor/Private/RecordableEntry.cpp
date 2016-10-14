@@ -18,7 +18,7 @@ void RecordableEntry::AddTransform(FTransform transform)
 	mTransform = transform;
 }
 
-FTransform RecordableEntry::GetTransform()
+FTransform& RecordableEntry::GetTransform()
 {
 	return mTransform;
 }
@@ -86,6 +86,11 @@ TMap<FName, FString>& RecordableEntry::GetMovementComponentProperties()
 	return mMovementComponentProperties;
 }
 
+TMap<FName, FTransform>& RecordableEntry::GetComponentTransforms()
+{
+	return mComponentTransforms;
+}
+
 /*void GameFrame::InitCharacterProperties(const FString & id)
 {
 	mCharacterProperties.Add(id, TMap<FName, FString>());
@@ -99,6 +104,16 @@ TMap<FName, FString>& RecordableEntry::GetCharacterProperties()
 		return *properties;
 	else
 		throw std::exception("value doesn't exist at key!");*/
+}
+
+TMap<FName, FString>& RecordableEntry::GetAnimBPProperties()
+{
+	return mAnimBPProperties;
+	/*TMap<FName, FString>* properties = mCharacterProperties.Find(id);
+	if (properties)
+	return *properties;
+	else
+	throw std::exception("value doesn't exist at key!");*/
 }
 
 UClass * RecordableEntry::GetClass()

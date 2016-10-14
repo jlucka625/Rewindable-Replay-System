@@ -23,7 +23,7 @@ public:
 
 	FTransform GetActorTransform();
 
-	void SetActorTransform(FTransform transform);
+	void SetActorTransform(FTransform& transform);
 
 	const FString& GetID() const;
 
@@ -42,6 +42,17 @@ public:
 	void CopyCharacterProperties(TMap<FName, FString>& propertiesAsStrings);
 
 	void SetCharacterProperties(const TMap<FName, FString>& propertiesAsStrings);
+
+	void CopyAnimBPProperties(TMap<FName, FString>& propertiesAsStrings);
+
+	void SetAnimBPProperties(const TMap<FName, FString>& propertiesAsStrings);
+
+	void GetComponentTransforms(TMap<FName, FTransform>& componentTransforms);
+
+	void SetComponentTransforms(const TMap<FName, FTransform>& componentTransforms);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Determinism)
+		bool IsDeterministic;
 
 private:
 	static uint32 mInstanceCounter;

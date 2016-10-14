@@ -23,13 +23,17 @@ public:
 	EntryCommands GetEntryCommand();
 
 	void AddTransform(FTransform transform);
-	FTransform GetTransform();
+	FTransform& GetTransform();
 
 	//void InitMovementComponentProperties();
 	TMap<FName, FString>& GetMovementComponentProperties();
 
 	//void InitCharacterProperties();
 	TMap<FName, FString>& GetCharacterProperties();
+
+	TMap<FName, FString>& GetAnimBPProperties();
+
+	TMap<FName, FTransform>& GetComponentTransforms();
 
 	UClass* GetClass();
 	void SetClass(UClass* uclass);
@@ -39,7 +43,9 @@ private:
 	EntryCommands mEntryCommand;
 	FTransform mTransform;
 	TMap<FName, FString> mMovementComponentProperties;
+	TMap<FName, FTransform> mComponentTransforms;
 	TMap<FName, FString> mCharacterProperties;
+	TMap<FName, FString> mAnimBPProperties;
 };
 
 class GameFrame
