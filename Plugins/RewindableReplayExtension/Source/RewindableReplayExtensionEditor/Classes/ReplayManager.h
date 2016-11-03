@@ -84,9 +84,6 @@ private:
 
 	static TArray<TPair<FString, class URecordingComponent*>> mNewlyAddedComponentIDs;
 
-	//UPROPERTY()
-	//TArray<TPair<FString, class URecordingComponent*>> StopMapGarbageCollection;
-
 	UCameraComponent* mCamera;
 	bool PlayInReverse;
 };

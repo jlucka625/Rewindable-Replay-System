@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "4.11",
+	"EngineAssociation": "4.12",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -13,10 +13,5 @@
 			]
 		}
 	],
-	"Plugins": [
-		{
-			"Name": "Substance",
-			"Enabled": true
-		}
-	]
+	"Plugins": [	]
 }

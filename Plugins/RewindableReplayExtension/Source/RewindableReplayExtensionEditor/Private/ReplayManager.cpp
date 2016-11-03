@@ -87,7 +87,6 @@ void AReplayManager::Tick( float DeltaTime )
 				mIterator--;
 				ReplayMenu.Get()->GetScrubber().Get()->SetValue((float)frameCount / mFrameBuffer.Size());
 				frameCount--;
-				//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, FString::Printf(TEXT("%f"), (*mIterator).GetDeltaTime()));
 			}
 			else TogglePlayback(1.0f);
 		}
@@ -99,7 +98,6 @@ void AReplayManager::Tick( float DeltaTime )
 				mIterator++;
 				ReplayMenu.Get()->GetScrubber().Get()->SetValue((float)frameCount / mFrameBuffer.Size());
 				frameCount++;
-				//GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Red, FString::Printf(TEXT("%f"), (*mIterator).GetDeltaTime()));
 			}
 			else TogglePlayback(1.0f);
 		}
@@ -169,7 +167,6 @@ void AReplayManager::RecordData(float DeltaTime)
 	{
 		sRecordingComponents.Add(pair.Key, pair.Value);
 		ComponentClasses.Add(pair.Key, pair.Value->GetOwner()->GetClass());
-		//StopMapGarbageCollection.Add(pair.Value);
 	}
 	mNewlyAddedComponentIDs.Empty();
 
@@ -268,12 +265,12 @@ void AReplayManager::PlaybackData(float DeltaTime, bool reverse)
 				component->SetCharacterProperties(entry->GetCharacterProperties());
 				component->SetMovementComponentProperties(entry->GetMovementComponentProperties());
 				component->SetAnimBPProperties(entry->GetAnimBPProperties());
-				component->UpdateAnimationState(DeltaTime);
+				component->UpdateAnimationState(frame.GetDeltaTime());
 			}
 			else
 			{
 				component->GetOwner()->Tick(frame.GetDeltaTime());
-				const TArray<UActorComponent*> actorComponents = component->GetOwner()->GetComponents();
+				const TSet<UActorComponent*> actorComponents = component->GetOwner()->GetComponents();
 				for (auto& actorComponent : actorComponents)
 					if(&actorComponent->PrimaryComponentTick && !actorComponent->IsA(UMeshComponent::StaticClass()))
 						actorComponent->TickComponent(frame.GetDeltaTime(), ELevelTick::LEVELTICK_PauseTick, &actorComponent->PrimaryComponentTick);
@@ -284,80 +281,6 @@ void AReplayManager::PlaybackData(float DeltaTime, bool reverse)
 	DisplayRecordedDebugInfo(frame);
 	DisplayRecordedDebugDrawLines(frame);
 	UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->UpdateCamera(0.0f);
-
-		//if ((component && component->IsValidLowLevel() && !component->IsPendingKill()))
-			//if (component->GetOwner()->GetLastRenderTime() > 0.01f)
-				//continue;
-
-		/*if (entry->GetEntryCommand() == RecordableEntry::EntryCommands::SPAWN_ME)
-		{
-			if ((!component || !component->IsValidLowLevel() || component->IsPendingKill()))
-			{
-				FTransform transform = entry->GetTransform();
-				AActor* spawned = GetWorld()->SpawnActor(entry->GetClass(), &transform);
-				component = Cast<URecordingComponent>(spawned->GetComponentByClass(URecordingComponent::StaticClass()));
-
-				component->SetID(id);
-				sRecordingComponents[id] = component;
-				//StopMapGarbageCollection.Remove(component);
-				//StopMapGarbageCollection.Add(recordingComponent);
-				//continue;
-			}
-			else if ((component && component->IsValidLowLevel() && !component->IsPendingKill()))
-			{
-				component->SetActorTransform(entry->GetTransform());
-
-				//component->SetComponentTransforms(entry->GetComponentTransforms());
-
-				if (!component->IsDeterministic)
-				{
-					/*component->SetCharacterProperties(entry->GetCharacterProperties());
-
-					component->SetMovementComponentProperties(entry->GetMovementComponentProperties());
-
-					component->SetAnimBPProperties(entry->GetAnimBPProperties());
-
-					component->UpdateAnimationState(DeltaTime);*/
-				/*}
-				else
-				{
-					/*component->GetOwner()->Tick(frame.GetDeltaTime());
-					const TArray<UActorComponent*> actorComponents = component->GetOwner()->GetComponents();
-					for (auto& actorComponent : actorComponents)
-					{
-						actorComponent->TickComponent(frame.GetDeltaTime(), ELevelTick::LEVELTICK_PauseTick, &actorComponent->PrimaryComponentTick);
-					}*/
-				/*}
-			}
-		}
-		else
-		{
-			if ((component && component->IsValidLowLevel() && !component->IsPendingKill()))
-			{
-				ComponentsToDelete.Add(component);
-				sRecordingComponents[id] = nullptr;
-
-				//component->GetOwner()->K2_DestroyActor();
-				//component->GetOwner()->ConditionalBeginDestroy();
-				//GetWorld()->ForceGarbageCollection(false);
-			}	
-		}
-	}
-
-	for (auto& comp : ComponentsToDelete)
-	{
-		comp->GetOwner()->Destroy();
-		delete comp->GetOwner();
-		comp = nullptr;
-	}
-	ComponentsToDelete.Empty();
-	//GetWorld()->ForceGarbageCollection(true);
-
-	//DisplayRecordedDebugInfo(frame);
-
-	//DisplayRecordedDebugDrawLines(frame);
-
-	UGameplayStatics::GetPlayerCameraManager(GetWorld(), 0)->UpdateCamera(0.0f);*/
 }
 
 void AReplayManager::DisplayRecordedDebugDrawLines(GameFrame& frame)
@@ -448,7 +371,6 @@ void AReplayManager::AddRecordingComponent(URecordingComponent * component, FStr
 		int32 index = mNewlyAddedComponentIDs.AddDefaulted();
 		mNewlyAddedComponentIDs[index].Key = componentID;
 		mNewlyAddedComponentIDs[index].Value = component;
-		//mNewlyAddedComponentIDs.Add(TPair<FString, URecordingComponent*>(componentID, component));
 	}
 }
 
